@@ -15,7 +15,7 @@ public class Client : Singleton<Client>
     public TCP tcp;
     public UDP udp;
 
-
+    public bool isConnected = false;
     private delegate void PacketHandler(Packet _packet);
     private static Dictionary<int, PacketHandler> packetHandlers;
 
@@ -24,13 +24,16 @@ public class Client : Singleton<Client>
         tcp = new TCP();
         udp = new UDP();
     }
-
     public void ConnectedToServer()
     {
         InitializeClientData();
+        isConnected = true;
         tcp.Connect();
     }
-
+    public void OnApplicationQuit()
+    {
+        Disconnect();
+    }
     public class TCP
     {
         public TcpClient socket;
@@ -92,7 +95,7 @@ public class Client : Singleton<Client>
                 int _byteLenght = stream.EndRead(_result);
                 if (_byteLenght <= 0)
                 {
-                    //todo disconnect
+                    Instance.Disconnect();
                     return;
                 }
 
@@ -104,8 +107,7 @@ public class Client : Singleton<Client>
             }
             catch (Exception _ex)
             {
-
-                //todo disconnect
+                Disconnect();
             }
         }
 
@@ -154,9 +156,16 @@ public class Client : Singleton<Client>
 
             return false;
         }
+        private void Disconnect()
+        {
+            Instance.Disconnect();
+            stream = null;
+            receiveBuffer = null;
+            receivedData = null;
+            socket = null;
+        }
 
     }
-
     public class UDP
     {
         public UdpClient socket;
@@ -185,7 +194,7 @@ public class Client : Singleton<Client>
             try
             {
                 _packet.InsertInt(Instance.myId);
-                if (socket != null)
+                if (socket != null && Instance.isConnected)
                 {
                     socket.BeginSend(_packet.ToArray(), _packet.Length(), null, null);
                 }
@@ -206,17 +215,14 @@ public class Client : Singleton<Client>
 
                 if (data.Length < 4)
                 {
-                    //TODO: disconnect 
+                    Instance.Disconnect();
                     return;
                 }
-
                 HandleData(data);
-
             }
             catch
             {
-
-                //TODO disconnect
+                Disconnect();
             }
         }
 
@@ -238,9 +244,13 @@ public class Client : Singleton<Client>
                 }
             });
         }
+        private void Disconnect()
+        {
+            Instance.Disconnect();
+            endPoint = null;
+            socket = null;
+        }
     }
-
-
     public void InitializeClientData()
     {
         packetHandlers = new Dictionary<int, PacketHandler>()
@@ -251,5 +261,16 @@ public class Client : Singleton<Client>
                 { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation}
             };
         print("Initialize Packets.");
+    }
+    private void Disconnect()
+    {
+        if (isConnected)
+        {
+            isConnected = false;
+            tcp.socket.Close();
+            udp.socket.Close();
+
+            Debug.Log("Disconnected From Server.");
+        }
     }
 }
