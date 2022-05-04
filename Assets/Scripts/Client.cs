@@ -27,7 +27,6 @@ public class Client : Singleton<Client>
     public void ConnectedToServer()
     {
         InitializeClientData();
-        isConnected = true;
         tcp.Connect();
     }
     public void OnApplicationQuit()
@@ -52,23 +51,27 @@ public class Client : Singleton<Client>
             };
 
             receiveBuffer = new byte[dataBufferSize];
+
             socket.BeginConnect(Instance.ip, Instance.port, ConnectCallBack, socket);
         }
 
         private void ConnectCallBack(IAsyncResult _result)
         {
-            socket.EndConnect(_result);
             if (!socket.Connected)
             {
+                Debug.Log("Sunucuya bağlanırken hata alındı.");
+                Instance.isConnected = false;
                 return;
             }
             else
             {
+                Debug.Log("Sunucuya Bağlanıldı.");
+                Instance.isConnected = true;
                 stream = socket.GetStream();
-
                 receivedData = new Packet();
                 stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallBack, null);
             }
+            socket.EndConnect(_result);
         }
 
         public void SendData(Packet _packet)
