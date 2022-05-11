@@ -39,6 +39,19 @@ public class ClientSend : MonoBehaviour
             }
             _packet.Write(GameManager.players[Client.Instance.myId].transform.rotation);
             _packet.Write(GameManager.players[Client.Instance.myId].transform.position);
+            _packet.Write(Movement.Instance.Animator.GetInteger("State"));
+
+            SendUDPData(_packet);
+        }
+    }
+
+    public static void SendMessage(string username, string message)
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.message))
+        {
+            _packet.Write(username);
+            _packet.Write(message);
+
             SendUDPData(_packet);
         }
     }

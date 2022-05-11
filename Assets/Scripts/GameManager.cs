@@ -9,6 +9,10 @@ public class GameManager : Singleton<GameManager>
 
     public GameObject localPlayerPrefab;
     public GameObject playerPrefab;
+    [SerializeField] private Camera orthoCamera;
+
+    public Camera OrthoCamera { get => orthoCamera; }
+
     // Start is called before the first frame update
     public void SpawnPlayer(int _id, string _username, Vector3 _position, Quaternion _rotation)
     {
@@ -16,6 +20,7 @@ public class GameManager : Singleton<GameManager>
         if (_id == Client.Instance.myId)
         {
             _player = Instantiate(localPlayerPrefab, _position, _rotation);
+            UIManager.Instance.DanceBtnFunc(_player.GetComponent<Movement>());
         }
         else
         {
@@ -25,7 +30,15 @@ public class GameManager : Singleton<GameManager>
         PlayerManager pm = _player.GetComponent<PlayerManager>();
         pm.id = _id;
         pm.username = _username;
+        Client.Instance.username = _username;//düzelebilir
         players.Add(_id, pm);
 
     }
+}
+
+public enum PlayerStates
+{
+    Listening,
+    Walking,
+    Dancing
 }

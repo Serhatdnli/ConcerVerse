@@ -1,98 +1,103 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
+using System.Threading;
 
-public class Movement : MonoBehaviour
+public class Movement : Singleton<Movement>
 {
     [SerializeField] private float speed = 12f, gravity = -9.81f, jumpHeight = 3f, groundDistance = .4f;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private VariableJoystick variableJoystick;
 
     private Animator animator;
     private CharacterController cController;
     private Vector3 velocity;
     bool isGrounded, oneTimeLock = true;
 
-    // Start is called before the first frame update
+    private Transform cameraTransform;
+    private PlayerStates myStates = PlayerStates.Listening;
+
+    public Animator Animator { get => animator; }
+
     void Start()
     {
+        CameraController.Instance.Target = transform;
         cController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        cameraTransform = CameraController.Instance.transform;
+        variableJoystick = UIManager.Instance.VariableJoystick;
     }
 
-    // Update is called once per frame
+    void FixedUpdate()
+    {
+
+        if (myStates == PlayerStates.Walking)
+        {
+            float heading = Mathf.Atan2(variableJoystick.Horizontal, variableJoystick.Vertical);
+            transform.rotation = Quaternion.Euler(0f, heading * Mathf.Rad2Deg, 0f);
+            cController.Move(transform.forward * speed * Time.fixedDeltaTime);
+        }
+    }
+
     void Update()
     {
-        isGrounded = Physics
-            .CheckSphere(groundCheck.position, groundDistance, groundLayer);
+        
+
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundLayer);
 
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2f;
         }
-        float x = Input.GetAxis("Horizontal") * 2;
-        float z = Input.GetAxis("Vertical");
+    }
+    private void LateUpdate()
+    {
+        TouchListener();
+    }
 
-        Vector3 move = transform.right * x + transform.forward * z;
 
-        if (move.magnitude > 1)
-            move /= move.magnitude;
-        //burada optimizasyon
-        cController.Move(move * speed * Time.deltaTime);
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-
-        velocity.y += gravity * Time.deltaTime;
-
-        cController.Move(velocity * Time.deltaTime);
-
-        if (Input.anyKey)
+    private void TouchListener()
+    {
+        if (Input.mousePosition.x < Screen.width / 3 && Input.mousePosition.y < Screen.height / 2)
         {
-            oneTimeLock = true;
-            if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A))
+            if (Input.GetMouseButtonDown(0))
             {
-                animator.SetFloat("State", 4.1f, .1f, Time.deltaTime);
+                MouseDown();
             }
-            else if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D))
+            if (Input.GetMouseButton(0))
             {
-                animator.SetFloat("State", 5.9f, .1f, Time.deltaTime);
+                MouseHold();
             }
-            else if (Input.GetKey(KeyCode.W))
+            if (Input.GetMouseButtonUp(0))
             {
-                animator.SetFloat("State", 5f, .1f, Time.deltaTime);
-            }
-            else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.A))
-            {
-                animator.SetFloat("State", 0, .1f, Time.deltaTime);
-            }
-            else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.D))
-            {
-                animator.SetFloat("State", 2f, .1f, Time.deltaTime);
-            }
-            else if (Input.GetKey(KeyCode.S))
-            {
-                animator.SetFloat("State", 1f, .1f, Time.deltaTime);
-            }
-            else if (Input.GetKey(KeyCode.Alpha1))
-            {
-                animator.SetFloat("State", 7f, .1f, Time.deltaTime);
-            }
-            else if(Input.GetKey(KeyCode.A))
-            {
-                animator.SetFloat("State", 4f, .1f, Time.deltaTime);
-            }
-            else if (Input.GetKey(KeyCode.D))
-            {
-                animator.SetFloat("State", 6f, .1f, Time.deltaTime);
+                MouseUp();
             }
         }
-        else
-        {
-            animator.SetFloat("State", 3f, .1f, Time.deltaTime);
+    }
 
-        }
+    //serverden gelen animasyon bizim anlık animasyonumuzu bozuyo ondan dolayı düzgün çalışmıyor. fixle
+    private void MouseDown()
+    {
+        animator.SetInteger("State", 1);
+        //print("down");
+        myStates = PlayerStates.Walking;
+    }
+    private void MouseHold()
+    {
+        //print("Mouse position : " + Input.mousePosition + "  Width : " + Screen.width + " Height : " + Screen.height);
+    }
+    private void MouseUp()
+    {
+        animator.SetInteger("State", 0);
+        //print("up");
+        myStates = PlayerStates.Listening;
+    }
 
-
+    public void Dance()
+    {
+        animator.SetInteger("State", 2);
     }
 }

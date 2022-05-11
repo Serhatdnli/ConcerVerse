@@ -10,8 +10,9 @@ public enum ServerPackets
     spawnPlayer,
     playerPosition,
     playerRotation,
-    playerMovement
-
+    playerMovement,
+    animator,
+    message
 }
 
 /// <summary>Sent from client to server.</summary>
@@ -21,7 +22,9 @@ public enum ClientPackets
     spawnPlayer,
     playerPosition,
     playerRotation,
-    playerMovement
+    playerMovement,
+    animator,
+    message
 }
 
 

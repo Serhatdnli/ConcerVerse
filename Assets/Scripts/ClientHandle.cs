@@ -31,8 +31,10 @@ public class ClientHandle : MonoBehaviour
     {
         int id = _packet.ReadInt();
         Vector3 position = _packet.ReadVector3();
+        int animatorState = _packet.ReadInt();
 
         GameManager.players[id].transform.position = position;
+        GameManager.players[id].GetComponent<Animator>()?.SetInteger("State", animatorState);
     }
 
     public static void PlayerRotation(Packet _packet)
@@ -41,5 +43,13 @@ public class ClientHandle : MonoBehaviour
         Quaternion rotation = _packet.ReadQuaternion();
 
         GameManager.players[id].transform.rotation = rotation;
+    }
+
+    public static void ReadMessageFromServer(Packet _packet)
+    {
+        string username = _packet.ReadString();
+        string message = _packet.ReadString();
+
+        UIManager.Instance.NewMessage(username, message);
     }
 }

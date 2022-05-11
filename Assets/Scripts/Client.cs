@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Net;
@@ -12,6 +12,7 @@ public class Client : Singleton<Client>
     public string ip = "127.0.0.1";
     public int port = 7777;
     public int myId = 0;
+    public string username = "";
     public TCP tcp;
     public UDP udp;
 
@@ -261,7 +262,8 @@ public class Client : Singleton<Client>
                 { (int)ServerPackets.welcome, ClientHandle.Welcome },
                 { (int)ServerPackets.spawnPlayer, ClientHandle.SpawnPlayer},
                 { (int)ServerPackets.playerPosition, ClientHandle.PlayerPosition},
-                { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation}
+                { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation},
+                { (int)ServerPackets.message, ClientHandle.ReadMessageFromServer}
             };
         print("Initialize Packets.");
     }
