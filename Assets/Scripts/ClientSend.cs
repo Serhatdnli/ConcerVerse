@@ -52,7 +52,7 @@ public class ClientSend : MonoBehaviour
             _packet.Write(username);
             _packet.Write(message);
 
-            SendUDPData(_packet);
+            SendTCPData(_packet);
         }
     }
     #endregion
