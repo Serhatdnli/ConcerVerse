@@ -13,7 +13,8 @@ public enum ServerPackets
     playerMovement,
     animator,
     message,
-    danceMusic
+    danceMusic,
+    destroyPlayer
 }
 
 /// <summary>Sent from client to server.</summary>
@@ -26,7 +27,8 @@ public enum ClientPackets
     playerMovement,
     animator,
     message,
-    danceMusic
+    danceMusic,
+    destroyPlayer
 }
 
 

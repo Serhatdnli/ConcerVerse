@@ -58,4 +58,10 @@ public class ClientHandle : MonoBehaviour
         int id = _packet.ReadInt();
         GameManager.players[id].GetComponent<PlayerManager>().DanceAudioStart();
     }
+    public static void DestroyPlayer(Packet _packet)
+    {
+        int id = _packet.ReadInt();
+        Destroy(GameManager.players[id].gameObject);
+        GameManager.players.Remove(id);
+    }
 }

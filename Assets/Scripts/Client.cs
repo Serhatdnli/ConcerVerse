@@ -250,7 +250,8 @@ public class Client : Singleton<Client>
                 { (int)ServerPackets.playerPosition, ClientHandle.PlayerPosition},
                 { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation},
                 { (int)ServerPackets.message, ClientHandle.ReadMessageFromServer},
-                { (int)ServerPackets.danceMusic, ClientHandle.DanceMusic}
+                { (int)ServerPackets.danceMusic, ClientHandle.DanceMusic},
+                { (int)ServerPackets.destroyPlayer, ClientHandle.DestroyPlayer}
             };
         print("Initialize Packets.");
     }
