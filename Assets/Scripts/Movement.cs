@@ -11,6 +11,8 @@ public class Movement : Singleton<Movement>
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private VariableJoystick variableJoystick;
 
+
+    private CameraController cameraController;
     private Animator animator;
     private CharacterController cController;
     private Vector3 velocity;
@@ -23,27 +25,28 @@ public class Movement : Singleton<Movement>
 
     void Start()
     {
-        CameraController.Instance.Target = transform;
+        cameraController = CameraController.Instance;
+        cameraController.Target = transform;
         cController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-        cameraTransform = CameraController.Instance.transform;
+        cameraTransform = cameraController.transform;
         variableJoystick = UIManager.Instance.VariableJoystick;
     }
 
     void FixedUpdate()
     {
-
+        ClientSend.PlayerMovement(transform.position,transform.rotation,animator.GetInteger("State"));
         if (myStates == PlayerStates.Walking)
         {
             float heading = Mathf.Atan2(variableJoystick.Horizontal, variableJoystick.Vertical);
-            transform.rotation = Quaternion.Euler(0f, heading * Mathf.Rad2Deg, 0f);
+            transform.rotation = Quaternion.Euler(0f, cameraController.transform.eulerAngles.y + (heading * Mathf.Rad2Deg), 0f);
             cController.Move(transform.forward * speed * Time.fixedDeltaTime);
         }
     }
 
     void Update()
     {
-        
+        TouchListener();
 
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundLayer);
 
@@ -52,33 +55,33 @@ public class Movement : Singleton<Movement>
             velocity.y = -2f;
         }
     }
-    private void LateUpdate()
-    {
-        TouchListener();
-    }
 
 
 
     private void TouchListener()
     {
-        if (Input.mousePosition.x < Screen.width / 3 && Input.mousePosition.y < Screen.height / 2)
+
+        foreach (Touch touch in Input.touches)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (touch.position.x < Screen.width / 3 && touch.position.y < Screen.height / 2)
             {
-                MouseDown();
-            }
-            if (Input.GetMouseButton(0))
-            {
-                MouseHold();
-            }
-            if (Input.GetMouseButtonUp(0))
-            {
-                MouseUp();
+                if (Input.GetMouseButtonDown(0))
+                {
+                    MouseDown();
+                }
+                if (Input.GetMouseButton(0))
+                {
+                    MouseHold();
+                }
+                if (Input.GetMouseButtonUp(0))
+                {
+                    MouseUp();
+                }
             }
         }
+
     }
 
-    //serverden gelen animasyon bizim anlık animasyonumuzu bozuyo ondan dolayı düzgün çalışmıyor. fixle
     private void MouseDown()
     {
         animator.SetInteger("State", 1);
@@ -87,7 +90,6 @@ public class Movement : Singleton<Movement>
     }
     private void MouseHold()
     {
-        //print("Mouse position : " + Input.mousePosition + "  Width : " + Screen.width + " Height : " + Screen.height);
     }
     private void MouseUp()
     {
@@ -99,5 +101,6 @@ public class Movement : Singleton<Movement>
     public void Dance()
     {
         animator.SetInteger("State", 2);
+        ClientSend.DanceMusic(GetComponent<PlayerManager>().id);
     }
 }

@@ -52,4 +52,10 @@ public class ClientHandle : MonoBehaviour
 
         UIManager.Instance.NewMessage(username, message);
     }
+
+    public static void DanceMusic(Packet _packet)
+    {
+        int id = _packet.ReadInt();
+        GameManager.players[id].GetComponent<PlayerManager>().DanceAudioStart();
+    }
 }

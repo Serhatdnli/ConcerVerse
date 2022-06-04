@@ -9,8 +9,8 @@ public class CameraController : Singleton<CameraController>
     [SerializeField] private Transform target;
     [SerializeField] private float sensitivity = 200f;
     private float mouseX, mouseY;
-    private Vector3 offSet = new Vector3(0, 4, 4);
-    private Vector3 offSet2 = new Vector3(0, 4, -4);
+    private Vector3 offSet = new Vector3(0, 3, -3);
+    private Vector3 offSet2 = new Vector3(0, 3, -3);
 
     public Transform Target
     {
@@ -18,38 +18,41 @@ public class CameraController : Singleton<CameraController>
         set
         {
             target = value;
+            transform.position = Vector3.Lerp(transform.position, target.position + offSet + offSet2, .2f);
         }
     }
 
-    // Update is called once per frame
     private void Update()
     {
-        mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
-        mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime;
+        TouchListener();
+    }
+
+    private void TouchListener()
+    {
         if (Target != null)
         {
             transform.position = Vector3.Lerp(transform.position, target.position + offSet + offSet2, .2f);
-            if (Input.mousePosition.x > (Screen.width / 3)*2)
+            foreach (Touch touch in Input.touches)
             {
-                offSet = Quaternion.AngleAxis(mouseX, Vector3.up) * offSet2;
-                offSet2 = Quaternion.AngleAxis(-mouseY, Vector3.right) * offSet;
-                transform.LookAt(target);
+                if (touch.position.x > (Screen.width / 3) * 2)
+                {
+                    mouseX = touch.deltaPosition.x * sensitivity * Time.deltaTime;
+                    mouseY = touch.deltaPosition.y * sensitivity * Time.deltaTime;
+
+
+                    offSet = Quaternion.AngleAxis(mouseX, Vector3.up) * offSet2;
+                    offSet2 = Quaternion.AngleAxis(-mouseY, Vector3.right) * offSet;
+
+                    transform.LookAt(target.position + new Vector3(0,2,0));
+
+                }
+
             }
-            //Vector3 angles = (Vector3.right * -mouseY) + (Vector3.up * mouseX);
-            //Target.Rotate(Vector3.up * mouseX);
         }
-        //if (Target != null)
-        //{
-        //    Vector3 angles = (Vector3.right * -mouseY) + (Vector3.up * mouseX);
-        //    offSet = Quaternion.AngleAxis(mouseX, Vector3.up) * offSet2;
-        //    offSet2 = Quaternion.AngleAxis(-mouseY, Vector3.right) * offSet;
-        //    //transform.Rotate(angles);
-        //    //transform.RotateAround(target.up,Vector3.up, mouseX);
-        //    //transform.RotateAround(target.right,Vector3.right, -mouseY);
-        //    transform.position = Vector3.Lerp(transform.position, target.position + offSet + offSet2, .5f);
-        //    transform.LookAt(target);
-        //    //Target.Rotate(Vector3.up * mouseX);
-        //}
+
+
+
+
     }
 
 

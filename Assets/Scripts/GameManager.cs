@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Video;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -10,6 +11,7 @@ public class GameManager : Singleton<GameManager>
     public GameObject localPlayerPrefab;
     public GameObject playerPrefab;
     [SerializeField] private Camera orthoCamera;
+    [SerializeField] private VideoPlayer vp;
 
     public Camera OrthoCamera { get => orthoCamera; }
 
@@ -19,12 +21,24 @@ public class GameManager : Singleton<GameManager>
         GameObject _player;
         if (_id == Client.Instance.myId)
         {
-            _player = Instantiate(localPlayerPrefab, _position, _rotation);
-            UIManager.Instance.DanceBtnFunc(_player.GetComponent<Movement>());
+            if (_username == "Sezen Aksu")
+            {
+                _player = Instantiate(localPlayerPrefab, new Vector3(0,4,150), Quaternion.Euler(new Vector3(0,180,0)));
+                //_player.transform.localScale = new Vector3(4, 4, 4);
+                UIManager.Instance.DanceBtnFunc(_player.GetComponent<Movement>());
+
+            }
+            else
+            {
+                _player = Instantiate(localPlayerPrefab, _position, _rotation);
+                UIManager.Instance.DanceBtnFunc(_player.GetComponent<Movement>());
+            }
         }
         else
         {
             _player = Instantiate(playerPrefab, _position, _rotation);
+            vp.Play();
+
         }
 
         PlayerManager pm = _player.GetComponent<PlayerManager>();

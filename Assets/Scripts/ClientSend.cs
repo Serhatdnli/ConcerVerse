@@ -28,18 +28,13 @@ public class ClientSend : MonoBehaviour
         }
     }
 
-    public static void PlayerMovement(bool[] _inputs)
+    public static void PlayerMovement(Vector3 _position,Quaternion _rotation, int _animState)
     {
         using (Packet _packet = new Packet((int)ClientPackets.playerMovement))
         {
-            _packet.Write(_inputs.Length);
-            foreach (bool _input in _inputs)
-            {
-                _packet.Write(_input);
-            }
-            _packet.Write(GameManager.players[Client.Instance.myId].transform.rotation);
-            _packet.Write(GameManager.players[Client.Instance.myId].transform.position);
-            _packet.Write(Movement.Instance.Animator.GetInteger("State"));
+            _packet.Write(_position);
+            _packet.Write(_rotation);
+            _packet.Write(_animState);
 
             SendUDPData(_packet);
         }
@@ -55,5 +50,15 @@ public class ClientSend : MonoBehaviour
             SendTCPData(_packet);
         }
     }
+
+    public static void DanceMusic(int _id)
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.danceMusic))
+        {
+            _packet.Write(_id);
+            SendUDPData(_packet);
+        }
+    }
+
     #endregion
 }
